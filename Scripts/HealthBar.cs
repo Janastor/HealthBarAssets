@@ -56,10 +56,6 @@ public class HealthBar : MonoBehaviour
         float timePassed = 0;
         float normalizedTime = 0;
 
-        timePassed = 0;
-        
-        print("CoroutineStarted");
-
         while (_healthbar.value != targetValue)
         {
             _healthbar.value = Mathf.MoveTowards(startingValue, targetValue, normalizedTime);
