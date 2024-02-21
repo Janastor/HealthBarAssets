@@ -6,23 +6,11 @@ using UnityEngine.UI;
 
 [RequireComponent(typeof(Slider))]
 
-public class SmoothHealthBar : MonoBehaviour
+public class SmoothHealthBar : HealthBar
 {
-    [SerializeField] private EntityHealth _entityHealth;
     [SerializeField] private float _valueChangeSpeed;
     
-    private Slider _healthbar;
     private Coroutine _changeHealthBarValueCoroutine;
-
-    private float _currentHealth => _entityHealth.Health;
-    private float _maxHealth => _entityHealth.MaxHealth;
-    private float _normalizedHealth => _currentHealth / _maxHealth;
-
-    private void OnEnable()
-    {
-        _entityHealth.HealthChanged += ChangeBarValue;
-        _healthbar = GetComponent<Slider>();
-    }
     
     private void Start()
     {
@@ -30,25 +18,15 @@ public class SmoothHealthBar : MonoBehaviour
         
     }
 
-    private void OnDisable()
-    {
-        _entityHealth.HealthChanged -= ChangeBarValue;
-    }
-
-    private void ChangeBarValue()
-    {
-        ChangeHealthBarValue();
-    }
-    
-    private void ChangeHealthBarValue()
+    protected override void ChangeValue()
     {
         if (_changeHealthBarValueCoroutine != null)
             StopCoroutine(_changeHealthBarValueCoroutine);
 
-        _changeHealthBarValueCoroutine = StartCoroutine(ChangeHealthBarValueCoroutine());
+        _changeHealthBarValueCoroutine = StartCoroutine(SmoothChangeValueCoroutine());
     }
 
-    private IEnumerator ChangeHealthBarValueCoroutine()
+    private IEnumerator SmoothChangeValueCoroutine()
     {
         while (_healthbar.value != _normalizedHealth)
         {
