@@ -8,60 +8,56 @@ public class HealthBar : MonoBehaviour
 {
     [SerializeField] private TMP_Text _text;
     [SerializeField] private Slider _healthbar;
-    [SerializeField] private PlayerHealth _playerHealth;
-    [SerializeField] private float _healthbarChangeDuration;
+    [SerializeField] private EntityHealth _entityHealth;
+    [SerializeField] private float _valueChangeSpeed;
     
     private char _slash = '/';
     private Coroutine _changeHealthBarValueCoroutine;
 
-    private int _currentHealth => _playerHealth.Health;
-    private int _maxHealth => _playerHealth.MaxHealth;
+    private float _currentHealth => _entityHealth.Health;
+    private float _maxHealth => _entityHealth.MaxHealth;
+    private float _normalizedHealth => _currentHealth / _maxHealth;
 
     private void OnEnable()
     {
-        _playerHealth.HealthChanged += ChangeHealth;
-        _healthbar.maxValue = _maxHealth;
+        _entityHealth.HealthChanged += ChangeValue;
     }
     
     private void Start()
     {
-        _text.text = _currentHealth.ToString() + _slash + _maxHealth.ToString();
-        _healthbar.value = _currentHealth;
+        _text.text = _currentHealth.ToString("0") + _slash + _maxHealth.ToString("0");
+        _healthbar.value = _normalizedHealth;
     }
 
     private void OnDisable()
     {
-        _playerHealth.HealthChanged -= ChangeHealth;
+        _entityHealth.HealthChanged -= ChangeValue;
     }
 
-    private void ChangeHealth()
+    private void ChangeValue()
     {
-        _text.text = _currentHealth.ToString() + _slash + _maxHealth.ToString();
-        StartChangeHealthBarCoroutine();
+        _text.text = _currentHealth.ToString("0") + _slash + _maxHealth.ToString("0");
+        ChangeHealthBarValue();
     }
     
-    private void StartChangeHealthBarCoroutine()
+    private void ChangeHealthBarValue()
     {
         if (_changeHealthBarValueCoroutine != null)
         {
             StopCoroutine(_changeHealthBarValueCoroutine);
-            _changeHealthBarValueCoroutine = null;
         }
         
-        _changeHealthBarValueCoroutine = StartCoroutine(ChangeHealthBar(_healthbar.value, _playerHealth.Health));
+        print(_normalizedHealth);
+        
+        _changeHealthBarValueCoroutine = StartCoroutine(ChangeHealthBarValueCoroutine());
     }
 
-    private IEnumerator ChangeHealthBar(float startingValue, float targetValue)
+    private IEnumerator ChangeHealthBarValueCoroutine()
     {
-        float timePassed = 0;
-        float normalizedTime = 0;
-
-        while (_healthbar.value != targetValue)
+        while (_healthbar.value != _normalizedHealth)
         {
-            _healthbar.value = Mathf.MoveTowards(startingValue, targetValue, normalizedTime);
-            timePassed += Time.deltaTime;
-            normalizedTime = timePassed / _healthbarChangeDuration;
-            
+            _healthbar.value = Mathf.MoveTowards(_healthbar.value, _normalizedHealth, _valueChangeSpeed * Time.deltaTime);
+
             yield return null;
         }
     }
