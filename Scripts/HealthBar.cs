@@ -10,8 +10,9 @@ public class HealthBar : MonoBehaviour
     [SerializeField] private Slider _healthbar;
     [SerializeField] private EntityHealth _entityHealth;
     [SerializeField] private float _valueChangeSpeed;
-    
-    private char _slash = '/';
+
+    private const string DisplayFormat = "0";
+    private const char Slash = '/';
     private Coroutine _changeHealthBarValueCoroutine;
 
     private float _currentHealth => _entityHealth.Health;
@@ -20,35 +21,31 @@ public class HealthBar : MonoBehaviour
 
     private void OnEnable()
     {
-        _entityHealth.HealthChanged += ChangeValue;
+        _entityHealth.HealthChanged += ChangeHealthValues;
     }
     
     private void Start()
     {
-        _text.text = _currentHealth.ToString("0") + _slash + _maxHealth.ToString("0");
+        _text.text = _currentHealth.ToString(DisplayFormat) + Slash + _maxHealth.ToString(DisplayFormat);
         _healthbar.value = _normalizedHealth;
     }
 
     private void OnDisable()
     {
-        _entityHealth.HealthChanged -= ChangeValue;
+        _entityHealth.HealthChanged -= ChangeHealthValues;
     }
 
-    private void ChangeValue()
+    private void ChangeHealthValues()
     {
-        _text.text = _currentHealth.ToString("0") + _slash + _maxHealth.ToString("0");
+        _text.text = _currentHealth.ToString(DisplayFormat) + Slash + _maxHealth.ToString(DisplayFormat);
         ChangeHealthBarValue();
     }
     
     private void ChangeHealthBarValue()
     {
         if (_changeHealthBarValueCoroutine != null)
-        {
             StopCoroutine(_changeHealthBarValueCoroutine);
-        }
-        
-        print(_normalizedHealth);
-        
+
         _changeHealthBarValueCoroutine = StartCoroutine(ChangeHealthBarValueCoroutine());
     }
 
